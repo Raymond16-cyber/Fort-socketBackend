@@ -75,16 +75,21 @@ io.on("connection", (socket) => {
 
   // Typing message indicator
   socket.on("typingmessage", (data) => {
+    // ✅ FIRST: Destructure everything you need
     const { senderID, senderName, receiverID, msg } = data;
+
+    // ✅ THEN: Use those values
     const user = findFriend(receiverID);
+
     if (user !== undefined) {
       io.to(user.socketID).emit("getTypedMessage", {
         senderID,
         receiverID,
         senderName,
-        msg: msg,
+        msg,
       });
     }
+
     console.log("typing message", data);
   });
 
