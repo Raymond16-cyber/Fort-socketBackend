@@ -59,8 +59,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    const { senderID, senderName, receiverID, message } = data;
-    const user = findFriend(receiverID);
+    const user = findFriend(receiverID); 
     if (user !== undefined) {
       io.to(user.socketID).emit("getMessage", {
         senderID,
@@ -73,6 +72,24 @@ io.on("connection", (socket) => {
       });
     }
   });
+  
+  // Typing message indicator
+  socket.on("typingmessage", (data) => {
+    const user = findFriend(receiverID); 
+    const { senderID, senderName, receiverID, msg } = data;
+    if (user !== undefined) {
+      io.to(user.socketID).emit("getTypedMessage", {
+        senderID,
+        receiverID,
+        senderName,
+        msg: msg
+      });
+    }
+  console.log("typing message",data);
+  
+})
+
+
   // listen for disconnect event
   socket.on("disconnect", () => {
     console.log("A user disconnected");
