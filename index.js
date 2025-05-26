@@ -4,14 +4,12 @@ const io = new Server(8000, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
 });
 
 // Add user
 let users = [];
-console.log(users);
-
 
 // const addUser = (userId, userInfo, socketID) => {
 //   const currentUser = users.some((user) => user.userId === userId);
@@ -61,7 +59,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    const user = findFriend(receiverID); 
+    const user = findFriend(receiverID);
     if (user !== undefined) {
       io.to(user.socketID).emit("getMessage", {
         senderID,
@@ -74,23 +72,21 @@ io.on("connection", (socket) => {
       });
     }
   });
-  
+
   // Typing message indicator
   socket.on("typingmessage", (data) => {
-    const user = findFriend(receiverID); 
     const { senderID, senderName, receiverID, msg } = data;
+    const user = findFriend(receiverID);
     if (user !== undefined) {
       io.to(user.socketID).emit("getTypedMessage", {
         senderID,
         receiverID,
         senderName,
-        msg: msg
+        msg: msg,
       });
     }
-  console.log("typing message",data);
-  
-})
-
+    console.log("typing message", data);
+  });
 
   // listen for disconnect event
   socket.on("disconnect", () => {
@@ -99,5 +95,3 @@ io.on("connection", (socket) => {
     io.emit("getUser", users);
   });
 });
-
-
