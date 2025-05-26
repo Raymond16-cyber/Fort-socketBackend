@@ -10,6 +10,8 @@ const io = new Server(8000, {
 
 // Add user
 let users = [];
+console.log(users);
+
 
 // const addUser = (userId, userInfo, socketID) => {
 //   const currentUser = users.some((user) => user.userId === userId);
