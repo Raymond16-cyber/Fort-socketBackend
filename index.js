@@ -19,13 +19,14 @@ const addUser = (userId, userInfo, socketID, friendsList) => {
   const exists = users.some((user) => user.userId === userId);
   if (!exists) {
     users.push({ userId, userInfo, socketID, friendsList });
+    // console.log("first instance",users);
   }
 };
 
 // disconnected user
 const removeUser = (socketID) => {
   users = users.filter((user) => user.socketID !== socketID);
-  console.log("updatedusers", users);
+  // console.log("updatedusers", users);
 };
 
 const findFriend = (id) => {
@@ -44,6 +45,7 @@ io.on("connection", (socket) => {
       const onlineFriends = users.filter((user) =>
         currentUser.friendsList.includes(user.userId)
       );
+      // console.log("userId:", userId, "onlineFriends:", onlineFriends);
       io.emit("getUser", onlineFriends);
     }
 
@@ -59,18 +61,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    const { senderID, senderName, receiverID, msg } = data;
-    const user = findFriend(receiverID);
+    const user = findFriend(data?.receiverID);
     if (user !== undefined) {
-      io.to(user.socketID).emit("getMessage", {
-        senderID,
-        senderName,
-        receiverID,
-        message: {
-          text: message.text,
-          image: message.image,
-        },
-      });
+      console.log("first..", data);
+
+      io.to(user.socketID).emit("getMessage", data);
     }
   });
 
@@ -91,12 +86,35 @@ io.on("connection", (socket) => {
       });
     }
 
-    console.log("typing message", data);
+    // console.log("typing message", data);
+  });
+
+  // Seen messages
+  socket.on("messageSeen", (msg) => {
+    const user = findFriend(msg?.senderID);
+    if (user !== undefined) {
+      io.to(user.socketID).emit("messageSeenResponse", msg);
+    }
+  });
+
+  // Delivered messages
+  socket.on("messageDelivered", (msg) => {
+    const user = findFriend(msg?.senderID);
+    if (user !== undefined) {
+      io.to(user.socketID).emit("messageDeliveredResponse", msg);
+    }
+  });
+
+  socket.on("'seen", (data) => {
+    const user = findFriend(data?.senderID);
+    if (user !== undefined) {
+      io.to(user.socketID).emit("seenSuccess", data);
+    }
   });
 
   // listen for disconnect event
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+    // console.log("A user disconnected");
     removeUser(socket.id);
     io.emit("getUser", users);
   });
