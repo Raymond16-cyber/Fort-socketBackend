@@ -105,11 +105,29 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("'seen", (data) => {
+  socket.on("seen", (data) => {
     const user = findFriend(data?.senderID);
     if (user !== undefined) {
       io.to(user.socketID).emit("seenSuccess", data);
     }
+  });
+
+  // Edit profile details
+  socket.on("editProfileDetails", (data) => {
+    console.log("the data", data);
+
+    const friends = data?.receiverID
+      .map((userId) => {
+        const user = users.find((u) => u.userId === userId);
+        return user?.socketID; // optional chaining avoids undefined errors
+      })
+      .filter(Boolean); // remove any undefined values (offline users)
+
+    friends.forEach((socketId) => {
+      console.log(socketId);
+      
+      io.emit("updatedProfileDetails", data);
+    });
   });
 
   // listen for disconnect event
